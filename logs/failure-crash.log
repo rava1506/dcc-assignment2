@@ -1,0 +1,4 @@
+READY 127.0.0.1:61482
+[replica-2] RECV   Increment(counter=x, delta=1)  L=4  (received L=3)
+
+KILLED after RECV; committed=True; acks=2; surviving values=[1,1]

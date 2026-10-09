@@ -1,0 +1,8 @@
+[replica-A] RECV   Increment(counter=x, delta=7)  L=2  (received L=1)
+[replica-A] APPLY  counter=x -> 7  L=3
+[replica-A] RECV   Increment(counter=x, delta=7)  L=5  (received L=4)
+[replica-A] DUP    counter=x -> 7  L=6
+[replica-A] SEND   IncrementReply(new_value=7)  L=7
+[replica-A] RECV   Get(counter=x)  L=10  (received L=9)
+[replica-A] READ   counter=x -> 7, found=True  L=11
+[replica-A] SEND   GetReply(value=7, found=True)  L=12
