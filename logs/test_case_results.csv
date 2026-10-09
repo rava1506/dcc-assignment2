@@ -1,0 +1,16 @@
+Test ID,Purpose and expected result,Actual result,Status
+test_increment_applies_delta,Increment applies +5 to a fresh counter,All listed assertions passed,PASS
+test_duplicate_key_not_reapplied,Duplicate returns original 5; current state stays 8,All listed assertions passed,PASS
+test_get_missing_counter,Missing counter has found=False and value=0,All listed assertions passed,PASS
+test_concurrent_increments_exact,Two clients x 1000 increments produce exactly 2000,All listed assertions passed,PASS
+test_retry_after_timeout_is_safe,Observed timeout; same-key retry; value=7; applies=1,All listed assertions passed,PASS
+test_majority_commit_two_acks,One replica stopped; committed=True and acks=2,All listed assertions passed,PASS
+test_no_commit_below_majority,Two replicas stopped; committed=False; surviving value=1,All listed assertions passed,PASS
+test_replicas_converge,30 delivered writes; all three values equal 30,All listed assertions passed,PASS
+test_lamport_rules,"Clock transitions equal 1, 11, 12",All listed assertions passed,PASS
+test_protocol_lamport_round_trip,Reply clock exceeds request; receiving client advances,All listed assertions passed,PASS
+test_counter_isolation,x=5 and y=3 remain independent,All listed assertions passed,PASS
+test_key_conflict_is_rejected,Reused key with another payload is INVALID_ARGUMENT,All listed assertions passed,PASS
+test_replica_crash_mid_request,"Killed after RECV; two acknowledgements; values=[1,1]",All listed assertions passed,PASS
+test_request_duplication,Second reply duplicate=True; current value=5,All listed assertions passed,PASS
+test_induced_timeout_with_retry,Delayed first reply; timeout then safe retry,All listed assertions passed,PASS

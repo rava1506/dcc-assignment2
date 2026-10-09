@@ -1,0 +1,9 @@
+{
+  "OS": "Windows-11-10.0.26200-SP0",
+  "Python": "3.13.0 (tags/v3.13.0:60403a5, Oct  7 2024, 09:38:07) [MSC v.1941 64 bit (AMD64)]",
+  "Machine": "AMD64",
+  "Processor": "AMD64 Family 25 Model 68 Stepping 1, AuthenticAMD",
+  "Method": "50 warmup writes per configuration; reused channels; logs quiet; all bounded replica calls awaited",
+  "p95": "nearest rank: sorted[ceil(0.95*n)-1]",
+  "Requests per configuration": 2000
+}
