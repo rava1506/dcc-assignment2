@@ -1,0 +1,15 @@
+B2 scenario generated from this run
+Pair 1: client-1 first SEND of Increment(x) -> replica-A RECV of that request.
+Pair 2: client-1 first RECV of IncrementReply -> its second SEND of Increment(x).
+Proof: pair 1 has a message edge; pair 2 has local program order.
+Concurrent pair: [client-1] SEND   Increment(counter=x, delta=1)  L=1
+                [client-2] SEND   Increment(counter=y, delta=1)  L=3
+The launcher barrier prevents either first request from reaching the server
+until all three client processes have logged their first SEND. Neither chosen SEND has
+an incoming reply before it. Thus neither causally precedes the other.
+Their times 1 and 3 differ; this does not establish causal or physical order.
+Lamport clocks cannot distinguish concurrency solely from scalar timestamps.
+Vector clocks can detect concurrency by incomparable timestamp vectors.
+The merged excerpt groups participants and preserves their local order.
+Diagram edges: client-1 SEND1 -> replica-A RECV1 -> APPLY1 -> SEND1 ->
+client-1 RECV1 -> client-1 SEND2. No causal edge between the two first SENDs.

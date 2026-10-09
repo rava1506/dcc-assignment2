@@ -1,0 +1,6 @@
+[client-2] START  scenario initialization  L=1
+[client-2] START  counter y selected  L=2
+[client-2] SEND   Increment(counter=y, delta=1)  L=3
+[client-2] RECV   IncrementReply(new_value=1)  L=16  (received L=15)
+[client-2] SEND   Increment(counter=y, delta=1)  L=17
+[client-2] RECV   IncrementReply(new_value=2)  L=25  (received L=24)
