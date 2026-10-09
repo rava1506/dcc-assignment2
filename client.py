@@ -156,31 +156,16 @@ def run_scenario():
     excerpt.extend(server_lines[index] for index in sorted(selected))
     (logs / "event_excerpt.log").write_text("\n".join(excerpt) + "\n", encoding="utf-8")
 
-    def first_send(name):
-        line = next(line for line in excerpt if line.startswith(f"[{name}] SEND"))
-        value = int(re.search(r"L=(\d+)", line).group(1))
-        return line, value
+    (logs / "event_excerpt.log").write_text(
+        "\n".join(excerpt) + "\n", encoding="utf-8"
+    )
+    print("Scenario OK: x=2 y=2. See logs/event_excerpt.log")
 
-    first, a = first_send("client-1")
-    second, b = first_send("client-2")
-    analysis = f"""B2 scenario generated from this run
-Pair 1: client-1 first SEND of Increment(x) -> replica-A RECV of that request.
-Pair 2: client-1 first RECV of IncrementReply -> its second SEND of Increment(x).
-Proof: pair 1 has a message edge; pair 2 has local program order.
-Concurrent pair: {first}
-                {second}
-The launcher barrier prevents either first request from reaching the server
-until all three client processes have logged their first SEND. Neither chosen SEND has
-an incoming reply before it. Thus neither causally precedes the other.
-Their times {a} and {b} differ; this does not establish causal or physical order.
-Lamport clocks cannot distinguish concurrency solely from scalar timestamps.
-Vector clocks can detect concurrency by incomparable timestamp vectors.
-The merged excerpt groups participants and preserves their local order.
-Diagram edges: client-1 SEND1 -> replica-A RECV1 -> APPLY1 -> SEND1 ->
-client-1 RECV1 -> client-1 SEND2. No causal edge between the two first SENDs.
-"""
-    (logs / "ordering_analysis.txt").write_text(analysis, encoding="utf-8")
-    print("Scenario OK: x=2 y=2. See logs/event_excerpt.log and logs/ordering_analysis.txt")
+
+class FileBarrier:
+    def __init__(self, folder, index):
+        self.folder = Path(folder)
+        self.index = index
 
 
 class FileBarrier:
