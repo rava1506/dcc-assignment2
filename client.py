@@ -74,6 +74,40 @@ class CounterClient:
                           f"Get(counter={counter_id})")
 
 
+class QuorumClient:
+    def __init__(self, targets, name="client-1", timeout=2.0, retries=3,
+                 backoff=0.2, quiet=False):
+        if len(targets) != 3 or len(set(targets)) != 3:
+            raise ValueError("Exactly three distinct replica addresses are required")
+        self.clock = LamportClock(name, quiet=quiet)
+        self.clients = [CounterClient(target, timeout=timeout, retries=retries,
+                                      backoff=backoff, clock=self.clock) for target in targets]
+        self.pool = ThreadPoolExecutor(max_workers=3)
+
+    def close(self):
+        self.pool.shutdown(wait=True)
+        for client in self.clients:
+            client.close()
+
+    def incr(self, counter_id, delta=1, key=None):
+        key = key if key is not None else str(uuid.uuid4())
+
+        def send(client):
+            try:
+                reply = client.incr(counter_id, delta, key)
+                return {"target": client.target, "new_value": reply.new_value,
+                        "was_duplicate": reply.was_duplicate}
+            except grpc.RpcError as error:
+                return {"target": client.target, "error": error.code().name}
+
+        # Wait for all bounded attempts; commit still requires only two acknowledgements.
+        results = list(self.pool.map(send, self.clients))
+        acks = sum("error" not in result for result in results)
+        committed = acks >= 2
+        self.clock.event("COMMIT" if committed else "FAIL", f"acks={acks}/3 key={key}")
+        return {"committed": committed, "acks": acks, "key": key, "replicas": results}
+
+
 def run_scenario():
     # Self-contained B2 scenario with three independent client processes.
     from server import start_server
@@ -196,6 +230,7 @@ def main():
     incr.add_argument("counter_id")
     incr.add_argument("--by", type=int, default=1)
     incr.add_argument("--key")
+    incr.add_argument("--replicas", nargs=3)
     get = sub.add_parser("get")
     get.add_argument("counter_id")
     sub.add_parser("scenario")
@@ -209,6 +244,17 @@ def main():
         return
     if args.command == "scenario":
         run_scenario()
+        return
+    if args.command == "incr" and args.replicas:
+        quorum = QuorumClient(args.replicas, name=args.name,
+                              timeout=args.timeout, quiet=args.quiet)
+        try:
+            result = quorum.incr(args.counter_id, args.by, args.key)
+            print(json.dumps(result, indent=2))
+            if not result["committed"]:
+                raise SystemExit(1)
+        finally:
+            quorum.close()
         return
     client = CounterClient(args.target, args.name, args.timeout, quiet=args.quiet)
     try:
